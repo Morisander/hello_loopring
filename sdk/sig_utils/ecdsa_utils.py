@@ -118,6 +118,51 @@ def generateTransferEIP712Hash(req: dict):
         transfer.hash_struct()
     )
 
+def generateNFTTransferEIP712Hash(req: dict):
+    """
+        struct Transfer
+        {
+            address from;
+            address to;
+            uint16  tokenID;
+            uint    amount;
+            uint16  feeTokenID;
+            uint    fee;
+            uint32  validUntil;
+            uint32  storageID;
+        }
+    """
+    class Transfer(EIP712Struct):
+        pass
+
+    setattr(Transfer, 'from', Address())
+    Transfer.to           = Address()
+    Transfer.tokenID      = Uint(16)
+    Transfer.amount       = Uint(96)
+    Transfer.feeTokenID   = Uint(16)
+    Transfer.maxFee       = Uint(96)
+    Transfer.validUntil   = Uint(32)
+    Transfer.storageID    = Uint(32)
+
+    # "Transfer(address from,address to,uint16 tokenID,uint96 amount,uint16 feeTokenID,uint96 maxFee,uint32 validUntil,uint32 storageID)"
+    transfer = Transfer(**{
+        "from"          : req['fromAddress'],
+        "to"            : req['toAddress'],
+        "tokenID"       : req['token']['tokenId'],
+        "amount"        : int(req['token']['amount']),
+        "feeTokenID"    : req['maxFee']['tokenId'],
+        "maxFee"        : int(req['maxFee']['amount']),
+        "validUntil"    : req['validUntil'],
+        "storageID"     : req['storageId']
+    })
+
+    # print(f"transfer type hash = {bytes.hex(transfer.type_hash())}")
+    return EIP712.hash_packed(
+        EIP712.exchangeDomain.hash_struct(),
+        transfer.hash_struct()
+    )
+
+
 def generateOffchainWithdrawalEIP712Hash(req: dict):
     """
         struct Withdrawal
