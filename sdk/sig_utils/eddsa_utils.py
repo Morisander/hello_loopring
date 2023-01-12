@@ -150,6 +150,30 @@ class OriginTransferEddsaSignHelper(EddsaSignHelper):
             int(originTransfer['validUntil']),
             int(originTransfer['storageId'])
         ]
+    
+class NFTTransferEddsaSignHelper(EddsaSignHelper):
+    def __init__(self, private_key):
+        super(NFTTransferEddsaSignHelper, self).__init__(
+            poseidon_params(SNARK_SCALAR_FIELD, 13, 6, 53, b'poseidon', 5, security_target=128),
+            private_key
+        )
+
+    def serialize_data(self, originTransfer):
+        return [
+            int(originTransfer['exchange'], 16),
+            int(originTransfer['fromAccountId']),
+            int(originTransfer['toAccountId']), # payer_toAccountID
+            int(originTransfer['token']['tokenId']),
+            int(originTransfer['token']['amount']),
+            int(originTransfer['maxFee']['tokenId']),
+            int(originTransfer['maxFee']['amount']),
+            int(originTransfer['toAddress'], 16), # payer_to
+            0, #int(originTransfer.get('dualAuthKeyX', '0'),16),
+            0, #int(originTransfer.get('dualAuthKeyY', '0'),16),
+            int(originTransfer['validUntil']),
+            int(originTransfer['storageId'])
+        ]
+
 
 class DualAuthTransferEddsaSignHelper(EddsaSignHelper):
     def __init__(self, private_key):
